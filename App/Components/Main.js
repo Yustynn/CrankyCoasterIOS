@@ -44,7 +44,7 @@ class Main extends Component {
     const shouldHaveDrunk = moment().hours() / 24 * recommendedConsumption
     const amountBehind = shouldHaveDrunk - volDrunk;
 
-    let hero;
+    let hero, leftToday;
 
     if (amountBehind < 0) hero = (
       <View style={ [styles.center, styles.hero, styles.green] }>
@@ -58,6 +58,24 @@ class Main extends Component {
         <Text style={ styles.randomBadText }>DRINK YOUR DAMN WATER!</Text>
       </View>
     );
+
+    if (recommendedConsumption - volDrunk > 0) leftToday = (
+      <View style={ [styles.center, styles.split, styles.column] }>
+        <View style={ [styles.row, styles.verticalBottom] }>
+          <Text style={ styles.bigText }>{ round( abs(recommendedConsumption - volDrunk) ) }</Text>
+          <Text style={ styles.mlText }>ml</Text>
+        </View>
+        <Text>left today</Text>
+      </View>
+    );
+    else  leftToday = (
+      <View style={ [styles.center, styles.split, styles.column] }>
+        <View style={ [styles.row, styles.verticalBottom] }>
+          <Text style={ styles.bigText }>DONE!</Text>
+        </View>
+        <Text>for the day</Text>
+      </View>
+    )
 
     return (
       <View>
@@ -75,13 +93,7 @@ class Main extends Component {
             <Text>{ (amountBehind < 0) ? 'over the minimum' : 'under the minimum' }</Text>
           </View>
 
-          <View style={ [styles.center, styles.split, styles.column] }>
-            <View style={ [styles.row, styles.verticalBottom] }>
-              <Text style={ styles.bigText }>{ round( abs(recommendedConsumption - volDrunk) ) }</Text>
-              <Text style={ styles.mlText }>ml</Text>
-            </View>
-            <Text>left today</Text>
-          </View>
+          { leftToday }
 
         </View>
       </View>
