@@ -15,7 +15,7 @@ import { setForceMultiplier, setRecommendedConsumption } from '../Data/actionCre
 
 require('../Data/firebase');
 
-const [GREEN, DARK_GREEN, RED, DARK_RED] = ['#BFE398', '#8FAB71', '#FFB5B5', '#FF9E9E'];
+const [GREEN, DARK_GREEN, RED, DARK_RED] = ['#BFE398', '#8FAB71', '#FFB5B5', '#cd5a5a'];
 const DARK_GREY = '#494949';
 
 const { height, width } = Dimensions.get('window');
@@ -34,13 +34,15 @@ class Main extends Component {
 
   render() {
     const { cupRecords, forceMultiplier, recommendedConsumption } = this.props;
+    const { abs, round } = Math;
 
     const volDrunk = cupRecords.toArray()
     .reduce( (sum, cr) => {
       return sum + forceMultiplier * (cr.get('changeInForce') || 0) // such hack
     }, 0 );
 
-    const amountBehind = moment().hours() / 24 * recommendedConsumption - volDrunk;
+    const shouldHaveDrunk = moment().hours() / 24 * recommendedConsumption
+    const amountBehind = shouldHaveDrunk - volDrunk;
 
     let hero;
 
@@ -60,12 +62,27 @@ class Main extends Component {
     return (
       <View>
         { hero }
-        <View style={ styles.center }>
-          <View style={ [styles.row, styles.verticalBottom] }>
-            <Text style={ styles.bigText }>{ Math.round( Math.abs(amountBehind) ) }</Text>
-            <Text style={ styles.mlText }>ml</Text>
+        <View style={ styles.row }>
+
+          <View style={ [styles.center, styles.split, styles.column] }>
+            <View style={ [styles.row, styles.verticalBottom] }>
+              <Text
+                style={ [styles.bigText, { color: (amountBehind < 0) ? 'black': DARK_RED }] }
+              >
+                { round( abs(amountBehind) ) }</Text>
+              <Text style={ styles.mlText }>ml</Text>
+            </View>
+            <Text>{ (amountBehind < 0) ? 'over the minimum' : 'under the minimum' }</Text>
           </View>
-          <Text>{ (amountBehind < 0) ? 'over the minimum' : 'under the minimum' }</Text>
+
+          <View style={ [styles.center, styles.split, styles.column] }>
+            <View style={ [styles.row, styles.verticalBottom] }>
+              <Text style={ styles.bigText }>{ round( abs(recommendedConsumption - volDrunk) ) }</Text>
+              <Text style={ styles.mlText }>ml</Text>
+            </View>
+            <Text>left today</Text>
+          </View>
+
         </View>
       </View>
     );
@@ -89,6 +106,9 @@ const styles =  StyleSheet.create({
     alignItems: 'center',
     height: height * 0.25,
     justifyContent: 'center',
+  },
+  column: {
+    flexDirection: 'column',
   },
   hero: {
     backgroundColor: GREEN,
@@ -119,6 +139,10 @@ const styles =  StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+  },
+  split: {
+    flexDirection: 'row',
+    width: width * 0.5,
   },
   verticalBottom: {
     alignItems: 'flex-end',
